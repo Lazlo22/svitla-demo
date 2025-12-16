@@ -1,11 +1,13 @@
-import './App.css';
+import { Suspense } from 'react'
+import { RouterProvider } from 'react-router'
 
-function App() {
+import GlobalLoader from '@components/common/GlobalLoader'
+import { router } from '@constants/routes'
+
+export default function App() {
   return (
-    <p>
-      Svitla Demo
-    </p>
-  );
+    <Suspense fallback={<GlobalLoader />}>
+      <RouterProvider router={router} />
+    </Suspense>
+  )
 }
-
-export default App;
