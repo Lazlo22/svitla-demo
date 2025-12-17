@@ -2,8 +2,8 @@ import { useState, lazy, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { FolderPlus, Upload } from 'lucide-react';
 
-import { useFolderStore } from '@stores/folderStore';
-import { useFileStore } from '@stores/fileStore';
+import { useFolderActions, useFolderGetters } from '@stores/folderStore';
+import { useFileStore, selectFiles, selectUploadFile } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
 import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
@@ -24,17 +24,11 @@ export default function FolderPage() {
 
   const folderId = params['*'] || '';
   
-  const {
-    createFolder, 
-    updateFolder, 
-    deleteFolder,
-    getFolderById,
-    getFoldersByParentId,
-    getFolderPath
-  } = useFolderStore();
+  const { createFolder, updateFolder, deleteFolder } = useFolderActions();
+  const { getFolderById, getFoldersByParentId, getFolderPath } = useFolderGetters();
 
-  const allFiles = useFileStore((state) => state.files);
-  const uploadFile = useFileStore((state) => state.uploadFile);
+  const allFiles = useFileStore(selectFiles);
+  const uploadFile = useFileStore(selectUploadFile);
 
   const { isOpen: isCreateDialogOpen, onOpen: onCreateDialogOpen, onToggle: onCreateDialogToggle } = useDisclosure();
   const { isOpen: isEditDialogOpen, onOpen: onEditDialogOpen, onToggle: onEditDialogToggle } = useDisclosure();

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage } from 'zustand/middleware';
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
+import { useShallow } from 'zustand/react/shallow';
 
 import type { IFolder } from '@type/folder';
 import { FOLDERS_STORAGE_KEY, FOLDERS_STORE_NAME } from '@constants/storage';
@@ -142,3 +143,31 @@ export const useFolderStore = create<FolderState>()(
     devToolsOptions
   )
 );
+
+export const selectFolders = (state: FolderState) => state.folders;
+export const selectFoldersCount = (state: FolderState) => state.folders.length;
+export const selectCreateFolder = (state: FolderState) => state.createFolder;
+export const selectUpdateFolder = (state: FolderState) => state.updateFolder;
+export const selectDeleteFolder = (state: FolderState) => state.deleteFolder;
+export const selectGetFolderById = (state: FolderState) => state.getFolderById;
+export const selectGetFoldersByParentId = (state: FolderState) =>
+  state.getFoldersByParentId;
+export const selectGetFolderPath = (state: FolderState) => state.getFolderPath;
+
+export const useFolderActions = () =>
+  useFolderStore(
+    useShallow((state) => ({
+      createFolder: state.createFolder,
+      updateFolder: state.updateFolder,
+      deleteFolder: state.deleteFolder,
+    }))
+  );
+
+export const useFolderGetters = () =>
+  useFolderStore(
+    useShallow((state) => ({
+      getFolderById: state.getFolderById,
+      getFoldersByParentId: state.getFoldersByParentId,
+      getFolderPath: state.getFolderPath,
+    }))
+  );

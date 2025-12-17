@@ -3,7 +3,7 @@ import { useState, useMemo, lazy } from 'react';
 import { FileItem } from '@components/files/FileItem';
 import { EmptyFileListState } from '@components/files/EmptyFileListState';
 import type { IFile } from '@type/file';
-import { useFileStore } from '@stores/fileStore';
+import { useFileStore, selectFiles, selectUpdateFileName, selectDeleteFile } from '@stores/fileStore';
 
 const FileRenameDialog = lazy(() => import('@components/files/FileRenameDialog').then(m => ({ default: m.FileRenameDialog })));
 const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog').then(m => ({ default: m.FileDeleteDialog })));
@@ -16,9 +16,9 @@ export function FileList({ folderId }: FileListProps) {
   const [renamingFile, setRenamingFile] = useState<IFile | null>(null);
   const [deletingFile, setDeletingFile] = useState<IFile | null>(null);
   
-  const allFiles = useFileStore((state) => state.files);
-  const updateFileName = useFileStore((state) => state.updateFileName);
-  const deleteFile = useFileStore((state) => state.deleteFile);
+  const allFiles = useFileStore(selectFiles);
+  const updateFileName = useFileStore(selectUpdateFileName);
+  const deleteFile = useFileStore(selectDeleteFile);
   
   const files = useMemo(() => allFiles.filter(f => f.folderId === folderId), [allFiles, folderId]);
 

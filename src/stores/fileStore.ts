@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage } from 'zustand/middleware';
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
+import { useShallow } from 'zustand/react/shallow';
 
 import type { IFile } from '@type/file';
 import { FILES_STORAGE_KEY, FILES_STORE_NAME } from '@constants/storage';
@@ -127,3 +128,18 @@ export const useFileStore = create<FileState>()(
     devToolsOptions
   )
 );
+
+export const selectFiles = (state: FileState) => state.files;
+export const selectFilesCount = (state: FileState) => state.files.length;
+export const selectUploadFile = (state: FileState) => state.uploadFile;
+export const selectUpdateFileName = (state: FileState) => state.updateFileName;
+export const selectDeleteFile = (state: FileState) => state.deleteFile;
+
+export const useFileActions = () =>
+  useFileStore(
+    useShallow((state) => ({
+      uploadFile: state.uploadFile,
+      updateFileName: state.updateFileName,
+      deleteFile: state.deleteFile,
+    }))
+  );

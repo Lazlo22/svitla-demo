@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@ui/dialog';
 import { Input } from '@ui/input';
-import { useFileStore } from '@stores/fileStore';
+import { useFileStore, selectUploadFile } from '@stores/fileStore';
 import { ACCEPTED_FILE_TYPES, ACCEPTED_FILE_MIME_TYPES } from '@constants/files';
 import { fileSizeToMB } from '@lib/file';
 import { useFileDrop } from '@hooks/use-file-drop';
@@ -24,7 +24,7 @@ interface FileUploadDialogProps {
 }
 
 export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDialogProps) {
-  const uploadFile = useFileStore((state) => state.uploadFile);
+  const uploadFile = useFileStore(selectUploadFile);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string>('');

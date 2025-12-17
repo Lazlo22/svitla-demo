@@ -1,27 +1,27 @@
 import { useNavigate } from 'react-router';
 import { Folder, FileText, Upload, FolderPlus } from 'lucide-react';
 
-import { useFolderStore } from '@stores/folderStore';
-import { useFileStore } from '@stores/fileStore';
+import { useFolderStore, selectFoldersCount } from '@stores/folderStore';
+import { useFileStore, selectFilesCount } from '@stores/fileStore';
 import { Button } from '@ui/button';
 import { navigationRoutes } from '@constants/routes';
 
 export default function HomePage() {
   const navigate = useNavigate();
 
-  const folders = useFolderStore((state) => state.folders);
-  const files = useFileStore((state) => state.files);
+  const foldersCount = useFolderStore(selectFoldersCount);
+  const filesCount = useFileStore(selectFilesCount);
 
   const stats = [
     {
       title: 'Total Folders',
-      value: folders.length,
+      value: foldersCount,
       icon: Folder,
       link: `/${navigationRoutes.folders.path}`,
     },
     {
       title: 'Total Files',
-      value: files.length,
+      value: filesCount,
       icon: FileText,
       link: `/${navigationRoutes.files.path}`,
     },
@@ -60,7 +60,7 @@ export default function HomePage() {
         })}
       </div>
 
-      {folders.length === 0 && files.length === 0 && (
+      {foldersCount === 0 && filesCount === 0 && (
         <div className="bg-muted/50 rounded-lg p-8 text-center">
           <h3 className="text-xl font-semibold mb-2">Get Started</h3>
           <p className="text-muted-foreground mb-6">

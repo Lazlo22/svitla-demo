@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Download, Pencil, Trash2 } from 'lucide-react';
-import { useState, lazy } from 'react';
+import { useState, lazy, useMemo } from 'react';
 
 import { Button } from '@ui/button';
-import { useFileStore } from '@stores/fileStore';
+import { useFileStore, selectFiles, selectUpdateFileName, selectDeleteFile } from '@stores/fileStore';
 import { fileSizeToMB } from '@lib/file';
 import { FileNotFound } from '@components/file/FileNotFound';
 import { FileViewer } from '@components/file/FileViewer';
@@ -19,14 +19,14 @@ export default function FilePage() {
   const { id } = useParams<Readonly<FilePageParams>>();
   const navigate = useNavigate();
   
-  const files = useFileStore((state) => state.files);
-  const updateFileName = useFileStore((state) => state.updateFileName);
-  const deleteFile = useFileStore((state) => state.deleteFile);
+  const files = useFileStore(selectFiles);
+  const updateFileName = useFileStore(selectUpdateFileName);
+  const deleteFile = useFileStore(selectDeleteFile);
   
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  const file = files.find(f => f.id === id);
+  const file = useMemo(() => files.find(f => f.id === id), [files, id]);
 
   const handleRename = async (newName: string) => {
     if (!file) return;

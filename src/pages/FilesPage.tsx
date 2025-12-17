@@ -1,7 +1,7 @@
 import { useState, lazy } from 'react';
 import { FileText, Upload } from 'lucide-react';
 
-import { useFileStore } from '@stores/fileStore';
+import { useFileStore, selectFiles, useFileActions } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
 import { Button } from '@ui/button';
 import { FileItem } from '@components/files/FileItem';
@@ -13,10 +13,8 @@ const FileRenameDialog = lazy(() => import('@components/files/FileRenameDialog')
 const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog').then(m => ({ default: m.FileDeleteDialog })));
 
 export default function FilesPage() {
-  const files = useFileStore((state) => state.files);
-  const uploadFile = useFileStore((state) => state.uploadFile);
-  const updateFileName = useFileStore((state) => state.updateFileName);
-  const deleteFile = useFileStore((state) => state.deleteFile);
+  const files = useFileStore(selectFiles);
+  const { uploadFile, updateFileName, deleteFile } = useFileActions();
   
   const { isOpen: isUploadDialogOpen, onOpen: onUploadDialogOpen, onToggle: onUploadDialogToggle } = useDisclosure();
   
