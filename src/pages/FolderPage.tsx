@@ -5,12 +5,14 @@ import { FolderPlus, Upload } from 'lucide-react';
 import { useFolderActions, useFolderGetters } from '@stores/folderStore';
 import { useFileStore, selectFiles, selectUploadFile } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
+import { useSearch } from '@hooks/use-search';
 import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
 import { FolderBreadcrumb } from '@components/folder/FolderBreadcrumb';
 import { FolderNotFound } from '@components/folder/FolderNotFound';
 import { FileList } from '@components/files/FileList';
 import { FileUploadDialog } from '@components/files/FileUploadDialog';
+import { SearchBar } from '@components/common/SearchBar';
 import EmptyState from '@components/common/EmptyState';
 import type { IFolder } from '@type/folder';
 
@@ -30,6 +32,7 @@ export default function FolderPage() {
   const allFiles = useFileStore(selectFiles);
   const uploadFile = useFileStore(selectUploadFile);
 
+  const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const { isOpen: isCreateDialogOpen, onOpen: onCreateDialogOpen, onToggle: onCreateDialogToggle } = useDisclosure();
   const { isOpen: isEditDialogOpen, onOpen: onEditDialogOpen, onToggle: onEditDialogToggle } = useDisclosure();
   const { isOpen: isDeleteDialogOpen, onOpen: onDeleteDialogOpen, onToggle: onDeleteDialogToggle } = useDisclosure();
@@ -43,6 +46,9 @@ export default function FolderPage() {
   const breadcrumbs = getFolderPath(folderId);
   
   const files = useMemo(() => allFiles.filter(f => f.folderId === folderId), [allFiles.length, folderId]);
+
+  const displayFolders = isSearching ? searchResults.folders.filter(f => f.parentId === folderId) : subfolders;
+  const displayFiles = isSearching ? searchResults.files.filter(f => f.folderId === folderId) : files;
 
   const handleFileDrop = async (file: File) => {
     try {
@@ -129,13 +135,19 @@ export default function FolderPage() {
         </div>
       )}
 
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search in this folder..."
+        className="mb-6"
+      />
+
       <div className="space-y-8">
-        {/* Subfolders Section */}
-        {subfolders.length > 0 && (
+        {displayFolders.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Subfolders</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {subfolders.map((folder) => (
+              {displayFolders.map((folder) => (
                 <FolderCard
                   key={folder.id}
                   folder={folder}
@@ -149,24 +161,22 @@ export default function FolderPage() {
           </div>
         )}
 
-        {/* Files Section */}
-        {files.length > 0 && (
+        {displayFiles.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Files</h2>
-            <FileList folderId={folderId} />
+            <FileList folderId={folderId} files={displayFiles} />
           </div>
         )}
 
-        {/* Empty State */}
-        {subfolders.length === 0 && files.length === 0 && (
+        {displayFolders.length === 0 && displayFiles.length === 0 && (
           <EmptyState
             icon={FolderPlus}
-            title="This folder is empty"
-            description="Create a subfolder or upload (drag and drop) a file to get started"
+            title={isSearching ? "No results found" : "This folder is empty"}
+            description={isSearching ? `No folders or files match "${searchQuery}"` : "Create a subfolder or upload (drag and drop) a file to get started"}
             actionLabel="Create Subfolder"
             actionIcon={FolderPlus}
             onAction={onCreateDialogOpen}
-            enableFileDrop={true}
+            enableFileDrop={!isSearching}
             onFileDrop={handleFileDrop}
             onFileDropError={handleFileDropError}
           />
@@ -186,23 +196,19 @@ export default function FolderPage() {
         folderId={folderId}
       />
 
-      {selectedFolder && (
-        <>
-          <EditFolderDialog
-            open={isEditDialogOpen}
-            onOpenChange={onEditDialogToggle}
-            onUpdateFolder={handleUpdateFolder}
-            currentName={selectedFolder.name}
-          />
+      <EditFolderDialog
+        open={isEditDialogOpen}
+        onOpenChange={onEditDialogToggle}
+        onUpdateFolder={handleUpdateFolder}
+        currentName={selectedFolder?.name || ""}
+      />
 
-          <DeleteFolderDialog
-            open={isDeleteDialogOpen}
-            onOpenChange={onDeleteDialogToggle}
-            onDeleteFolder={handleDeleteFolder}
-            folderName={selectedFolder.name}
-          />
-        </>
-      )}
+      <DeleteFolderDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={onDeleteDialogToggle}
+        onDeleteFolder={handleDeleteFolder}
+        folderName={selectedFolder?.name || ""}
+      />
     </div>
   );
 }

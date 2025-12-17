@@ -168,4 +168,40 @@ describe('FoldersPage', () => {
     expect(await screen.findByText('test-document.pdf')).toBeInTheDocument();
     expect(screen.queryByText('nested-file.pdf')).not.toBeInTheDocument();
   });
+
+  it('filters folders and files when searching', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFolderStore.setState({ folders: [mockFolder, { ...mockFolder, id: 'folder-2', name: 'Another Folder' }] });
+      useFileStore.setState({ files: [mockFile, { ...mockFile, id: 'file-2', name: 'another-doc.pdf' }] });
+    });
+
+    render(<FoldersPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search folders and files...');
+    await user.type(searchInput, 'Test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Folder')).toBeInTheDocument();
+      expect(screen.queryByText('Another Folder')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no results message when search has no matches', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFolderStore.setState({ folders: [mockFolder] });
+    });
+
+    render(<FoldersPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search folders and files...');
+    await user.type(searchInput, 'nonexistent');
+
+    await waitFor(() => {
+      expect(screen.getByText('No results found')).toBeInTheDocument();
+    });
+  });
 });

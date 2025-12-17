@@ -3,8 +3,10 @@ import { FileText, Upload } from 'lucide-react';
 
 import { useFileStore, selectFiles, useFileActions } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
+import { useSearch } from '@hooks/use-search';
 import { Button } from '@ui/button';
 import { FileItem } from '@components/files/FileItem';
+import { SearchBar } from '@components/common/SearchBar';
 import EmptyState from '@components/common/EmptyState';
 import type { IFile } from '@type/file';
 
@@ -16,11 +18,14 @@ export default function FilesPage() {
   const files = useFileStore(selectFiles);
   const { uploadFile, updateFileName, deleteFile } = useFileActions();
   
+  const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const { isOpen: isUploadDialogOpen, onOpen: onUploadDialogOpen, onToggle: onUploadDialogToggle } = useDisclosure();
   
   const [renamingFile, setRenamingFile] = useState<IFile | null>(null);
   const [deletingFile, setDeletingFile] = useState<IFile | null>(null);
   const [dropError, setDropError] = useState<string>('');
+
+  const displayFiles = isSearching ? searchResults.files : files;
 
   const handleFileDrop = async (file: File) => {
     try {
@@ -68,23 +73,30 @@ export default function FilesPage() {
         </div>
       )}
 
-      {files.length === 0 ? (
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search files by name..."
+        className="mb-6"
+      />
+
+      {displayFiles.length === 0 ? (
         <EmptyState
           icon={FileText}
-          title="No files yet"
-          description="Upload your first PDF file to get started or drag and drop here"
+          title={isSearching ? "No results found" : "No files yet"}
+          description={isSearching ? `No files match "${searchQuery}"` : "Upload your first PDF file to get started or drag and drop here"}
           actionLabel="Upload File"
           actionIcon={Upload}
           onAction={onUploadDialogOpen}
-          enableFileDrop={true}
+          enableFileDrop={!isSearching}
           onFileDrop={handleFileDrop}
           onFileDropError={handleFileDropError}
         />
       ) : (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">All Files ({files.length})</h2>
+          <h2 className="text-lg font-semibold">All Files ({displayFiles.length})</h2>
           <div className="space-y-1">
-            {files.map((file) => (
+            {displayFiles.map((file) => (
               <FileItem
                 key={file.id}
                 file={file}

@@ -10,9 +10,10 @@ const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog')
 
 interface FileListProps {
   folderId: string | null;
+  files?: IFile[];
 }
 
-export function FileList({ folderId }: FileListProps) {
+export function FileList({ folderId, files: filesProp }: FileListProps) {
   const [renamingFile, setRenamingFile] = useState<IFile | null>(null);
   const [deletingFile, setDeletingFile] = useState<IFile | null>(null);
   
@@ -20,7 +21,10 @@ export function FileList({ folderId }: FileListProps) {
   const updateFileName = useFileStore(selectUpdateFileName);
   const deleteFile = useFileStore(selectDeleteFile);
   
-  const files = useMemo(() => allFiles.filter(f => f.folderId === folderId), [allFiles, folderId]);
+  const files = useMemo(() => 
+    filesProp ?? allFiles.filter(f => f.folderId === folderId), 
+    [filesProp, allFiles, folderId]
+  );
 
   const handleRename = async (newName: string) => {
     if (renamingFile) {

@@ -180,4 +180,51 @@ describe('FolderPage', () => {
     expect(await screen.findByText('Subfolder')).toBeInTheDocument();
     expect(screen.queryByText('Nested')).not.toBeInTheDocument();
   });
+
+  it('filters subfolders and files when searching', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFolderStore.setState({ 
+        folders: [
+          mockFolder, 
+          mockSubfolder,
+          { ...mockSubfolder, id: 'subfolder-2', name: 'Another Subfolder' }
+        ] 
+      });
+      useFileStore.setState({ 
+        files: [
+          mockFile,
+          { ...mockFile, id: 'file-2', name: 'another-doc.pdf' }
+        ] 
+      });
+    });
+
+    render(<FolderPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search in this folder...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('test-document.pdf')).toBeInTheDocument();
+      expect(screen.queryByText('another-doc.pdf')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no results message when search has no matches', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFolderStore.setState({ folders: [mockFolder, mockSubfolder] });
+    });
+
+    render(<FolderPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search in this folder...');
+    await user.type(searchInput, 'nonexistent');
+
+    await waitFor(() => {
+      expect(screen.getByText('No results found')).toBeInTheDocument();
+    });
+  });
 });

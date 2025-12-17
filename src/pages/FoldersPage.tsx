@@ -5,10 +5,12 @@ import { FolderPlus, Folder, Upload } from 'lucide-react';
 import { useFolderStore, useFolderActions, selectGetFoldersByParentId } from '@stores/folderStore';
 import { useFileStore, selectFiles, selectUploadFile } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
+import { useSearch } from '@hooks/use-search';
 import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
 import { FileList } from '@components/files/FileList';
 import { FileUploadDialog } from '@components/files/FileUploadDialog';
+import { SearchBar } from '@components/common/SearchBar';
 import EmptyState from '@components/common/EmptyState';
 import type { IFolder } from '@type/folder';
 
@@ -25,6 +27,7 @@ export default function FoldersPage() {
   const allFiles = useFileStore(selectFiles);
   const uploadFile = useFileStore(selectUploadFile);
 
+  const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
   const { isOpen: isCreateDialogOpen, onOpen: onCreateDialogOpen, onToggle: onCreateDialogToggle } = useDisclosure();
   const { isOpen: isEditDialogOpen, onOpen: onEditDialogOpen, onToggle: onEditDialogToggle } = useDisclosure();
   const { isOpen: isDeleteDialogOpen, onOpen: onDeleteDialogOpen, onToggle: onDeleteDialogToggle } = useDisclosure();
@@ -37,6 +40,9 @@ export default function FoldersPage() {
   const rootFolders = getFoldersByParentId(null);
   
   const rootFiles = useMemo(() => allFiles.filter(f => f.folderId === null), [allFiles]);
+
+  const displayFolders = isSearching ? searchResults.folders : rootFolders;
+  const displayFiles = isSearching ? searchResults.files : rootFiles;
 
   const handleFileDrop = async (file: File) => {
     try {
@@ -119,13 +125,19 @@ export default function FoldersPage() {
         </div>
       )}
 
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search folders and files..."
+        className="mb-6"
+      />
+
       <div className="space-y-8">
-        {/* Folders Section */}
-        {rootFolders.length > 0 && (
+        {displayFolders.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Folders</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {rootFolders.map((folder) => (
+              {displayFolders.map((folder) => (
                 <FolderCard
                   key={folder.id}
                   folder={folder}
@@ -139,24 +151,22 @@ export default function FoldersPage() {
           </div>
         )}
 
-        {/* Files Section */}
-        {rootFiles.length > 0 && (
+        {displayFiles.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Files</h2>
-            <FileList folderId={null} />
+            <FileList folderId={null} files={displayFiles} />
           </div>
         )}
 
-        {/* Empty State */}
-        {rootFolders.length === 0 && rootFiles.length === 0 && (
+        {displayFolders.length === 0 && displayFiles.length === 0 && (
           <EmptyState
             icon={Folder}
-            title="No folders or files yet"
-            description="Create your first folder or upload a file to get started, or drag and drop here"
+            title={isSearching ? "No results found" : "No folders or files yet"}
+            description={isSearching ? `No folders or files match "${searchQuery}"` : "Create your first folder or upload a file to get started, or drag and drop here"}
             actionLabel="Create Folder"
             actionIcon={FolderPlus}
             onAction={onCreateDialogOpen}
-            enableFileDrop={true}
+            enableFileDrop={!isSearching}
             onFileDrop={handleFileDrop}
             onFileDropError={handleFileDropError}
           />
@@ -176,23 +186,19 @@ export default function FoldersPage() {
         folderId={null}
       />
 
-      {selectedFolder && (
-        <>
-          <EditFolderDialog
-            open={isEditDialogOpen}
-            onOpenChange={onEditDialogToggle}
-            onUpdateFolder={handleUpdateFolder}
-            currentName={selectedFolder.name}
-          />
+      <EditFolderDialog
+        open={isEditDialogOpen}
+        onOpenChange={onEditDialogToggle}
+        onUpdateFolder={handleUpdateFolder}
+        currentName={selectedFolder?.name || ""}
+      />
 
-          <DeleteFolderDialog
-            open={isDeleteDialogOpen}
-            onOpenChange={onDeleteDialogToggle}
-            onDeleteFolder={handleDeleteFolder}
-            folderName={selectedFolder.name}
-          />
-        </>
-      )}
+      <DeleteFolderDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={onDeleteDialogToggle}
+        onDeleteFolder={handleDeleteFolder}
+        folderName={selectedFolder?.name || ""}
+      />
     </div>
   );
 }

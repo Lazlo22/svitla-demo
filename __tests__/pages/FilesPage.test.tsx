@@ -111,4 +111,46 @@ describe('FilesPage', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
+
+  it('filters files when searching', async () => {
+    const user = userEvent.setup();
+
+    const files = [
+      mockFile,
+      { ...mockFile, id: 'file-2', name: 'another-file.pdf' },
+      { ...mockFile, id: 'file-3', name: 'test-file.pdf' },
+    ];
+
+    act(() => {
+      useFileStore.setState({ files });
+    });
+
+    render(<FilesPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search files by name...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('test-document.pdf')).toBeInTheDocument();
+      expect(screen.getByText('test-file.pdf')).toBeInTheDocument();
+      expect(screen.queryByText('another-file.pdf')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no results message when search has no matches', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFileStore.setState({ files: [mockFile] });
+    });
+
+    render(<FilesPage />);
+
+    const searchInput = await screen.findByPlaceholderText('Search files by name...');
+    await user.type(searchInput, 'nonexistent');
+
+    await waitFor(() => {
+      expect(screen.getByText('No results found')).toBeInTheDocument();
+    });
+  });
 });
