@@ -1,73 +1,206 @@
-# React + TypeScript + Vite
+# Svitla Demo - React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern file system manager application built with React, TypeScript, and Vite. Similar to Google Drive or Dropbox, this application allows users to organize, manage, and view PDF documents with an intuitive drag-and-drop interface and persistent storage.
 
-Currently, two official plugins are available:
+## Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+[Live Demo Link](https://svitla-demo.vercel.app/)
 
-## React Compiler
+## Overview
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+This project is a file system manager that provides a cloud storage-like experience for managing PDF documents. Users can create folders, organize files with drag-and-drop, view PDFs in-browser, and have their file structure persist locally using IndexedDB.
 
-## Expanding the ESLint configuration
+Key features include:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Modern React 19 with TypeScript
+- Fast development with Vite and SWC
+- Drag-and-drop interfaces using react-dnd
+- Form management with react-hook-form and Zod validation
+- PDF viewing capabilities with react-pdf
+- State management with Zustand
+- Persistent storage with IndexedDB (idb-keyval)
+- Routing with React Router v7
+- UI components built with shadcn/ui
+- Styling with Tailwind CSS v4
+- Comprehensive test coverage with Vitest
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Core
+- **React 19.2** - Latest React with improved performance and features
+- **TypeScript 5.9** - Type-safe development
+- **Vite 7.2** - Lightning-fast build tool with HMR
+- **SWC** - Super-fast TypeScript/JavaScript compiler
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### UI & Styling
+- **Tailwind CSS 4.1** - Utility-first CSS framework
+- **shadcn/ui** - Re-usable components built with Radix UI and Tailwind CSS
+- **Lucide React** - Beautiful icon library
+- **class-variance-authority** - Type-safe component variants
+- **tw-animate-css** - Tailwind animation utilities
+
+### State & Data Management
+- **Zustand 5.0** - Lightweight state management
+- **Immer 11.0** - Immutable state updates
+- **idb-keyval 6.2** - Simple IndexedDB wrapper for persistence
+- **React Hook Form 7.68** - Performant form handling
+- **Zod 4.2** - TypeScript-first schema validation
+
+### Features
+- **React DnD 16.0** - Drag-and-drop functionality
+- **React PDF 10.2** - PDF viewing and rendering
+- **React Router 7.10** - Client-side routing
+
+### Development & Testing
+- **Vitest 4.0** - Fast unit testing framework
+- **Testing Library** - React component testing utilities
+- **ESLint 9** - Code linting
+- **@vitest/coverage-v8** - Code coverage reporting
+
+## Setup Guide
+
+### Prerequisites
+
+- Node.js 18+ and npm (or yarn/pnpm)
+- Git
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd svitla-demo
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies:
+```bash
+npm install
 ```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`
+
+### Available Scripts
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production (TypeScript check + Vite build)
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint to check code quality
+- `npm run test` - Run tests once
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Generate test coverage report
+
+## Testing Guide
+
+This project uses Vitest with React Testing Library for comprehensive testing.
+
+### Running Tests
+
+```bash
+# Run all tests once
+npm run test
+
+# Run tests in watch mode (auto-rerun on changes)
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Structure
+
+Tests are organized in the `__tests__` directory, mirroring the `src` structure:
+
+```
+__tests__/
+├── components/    # Component tests
+├── constants/     # Constants and configuration tests
+├── hooks/         # Custom hooks tests
+├── lib/           # Utility function tests
+├── pages/         # Page component tests
+└── stores/        # State management tests
+```
+
+### Coverage Reports
+
+After running `npm run test:coverage`, open `coverage/index.html` in your browser to view detailed coverage reports.
+
+### Test Configuration
+
+- **Environment**: jsdom (simulates browser environment)
+- **Setup**: `src/test/setup.ts` (global test configuration)
+- **Coverage exclusions**: node_modules, test files, type definitions
+
+## Project Structure
+
+```
+src/
+├── components/    # Reusable UI components
+├── constants/     # App constants and routes
+├── hooks/         # Custom React hooks
+├── layouts/       # Layout components
+├── lib/           # Utility functions and helpers
+├── pages/         # Page components
+├── stores/        # Zustand state stores
+├── test/          # Test utilities and setup
+├── types/         # TypeScript type definitions
+└── zod/           # Zod validation schemas
+```
+
+### Path Aliases
+
+The project uses TypeScript path aliases for cleaner imports:
+
+- `@/` → `src/`
+- `@pages/` → `src/pages/`
+- `@layouts/` → `src/layouts/`
+- `@components/` → `src/components/`
+- `@ui/` → `src/components/ui/`
+- `@hooks/` → `src/hooks/`
+- `@constants/` → `src/constants/`
+- `@lib/` → `src/lib/`
+- `@stores/` → `src/stores/`
+- `@type/` → `src/types/`
+- `@zod/` → `src/zod/`
+
+## Possible Improvements
+
+### Performance
+- Implement code splitting with React.lazy for route-based chunking
+- Use more memoization with useMemo, useCallback, and memo
+- Optimize bundle size with dynamic imports for heavy libraries (react-pdf)
+- Implement virtual scrolling for large lists
+
+### Features
+- Add internationalization (i18n) support
+- Add user authentication and authorization
+- Add error boundary components for better error handling
+
+### Developer Experience
+- Add Storybook for component documentation
+- Set up Husky for pre-commit hooks
+- Add Prettier for consistent code formatting
+- Implement conventional commits with commitlint
+- Add GitHub Actions for CI/CD
+- Set up automated dependency updates with Dependabot
+
+### Testing
+- Increase test coverage to 90%+
+- Add E2E tests with Playwright or Cypress
+
+### Code Quality
+- Enable stricter TypeScript rules (strict mode)
+- Add type-aware ESLint rules
+- Implement accessibility audits with axe-core
+- Add bundle size monitoring
+- Set up performance monitoring (Web Vitals)
+
+### Infrastructure
+- Add Docker configuration for containerization
+- Set up environment-specific configurations
+- Implement feature flags system
+- Set up monitoring and logging (Sentry, LogRocket)
