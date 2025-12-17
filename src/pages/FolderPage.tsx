@@ -34,6 +34,7 @@ export default function FolderPage() {
   } = useFolderStore();
 
   const allFiles = useFileStore((state) => state.files);
+  const uploadFile = useFileStore((state) => state.uploadFile);
 
   const { isOpen: isCreateDialogOpen, onOpen: onCreateDialogOpen, onToggle: onCreateDialogToggle } = useDisclosure();
   const { isOpen: isEditDialogOpen, onOpen: onEditDialogOpen, onToggle: onEditDialogToggle } = useDisclosure();
@@ -41,12 +42,26 @@ export default function FolderPage() {
   const { isOpen: isUploadDialogOpen, onOpen: onUploadDialogOpen, onToggle: onUploadDialogToggle } = useDisclosure();
 
   const [selectedFolder, setSelectedFolder] = useState<IFolder | null>(null);
+  const [dropError, setDropError] = useState<string>('');
 
   const currentFolder = getFolderById(folderId);
   const subfolders = getFoldersByParentId(folderId);
   const breadcrumbs = getFolderPath(folderId);
   
   const files = useMemo(() => allFiles.filter(f => f.folderId === folderId), [allFiles.length, folderId]);
+
+  const handleFileDrop = async (file: File) => {
+    try {
+      setDropError('');
+      await uploadFile(file, folderId);
+    } catch (err) {
+      setDropError(err instanceof Error ? err.message : 'Failed to upload file');
+    }
+  };
+
+  const handleFileDropError = (error: string) => {
+    setDropError(error);
+  };
 
   const handleCreateFolder = async (name: string) => {
     await createFolder(name, folderId);
@@ -114,6 +129,12 @@ export default function FolderPage() {
         </div>
       </div>
 
+      {dropError && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive">{dropError}</p>
+        </div>
+      )}
+
       <div className="space-y-8">
         {/* Subfolders Section */}
         {subfolders.length > 0 && (
@@ -147,10 +168,13 @@ export default function FolderPage() {
           <EmptyState
             icon={FolderPlus}
             title="This folder is empty"
-            description="Create a subfolder or upload a file to get started"
+            description="Create a subfolder or upload (drag and drop) a file to get started"
             actionLabel="Create Subfolder"
             actionIcon={FolderPlus}
             onAction={onCreateDialogOpen}
+            enableFileDrop={true}
+            onFileDrop={handleFileDrop}
+            onFileDropError={handleFileDropError}
           />
         )}
       </div>

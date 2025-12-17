@@ -27,6 +27,7 @@ export default function FoldersPage() {
   } = useFolderStore();
 
   const allFiles = useFileStore((state) => state.files);
+  const uploadFile = useFileStore((state) => state.uploadFile);
 
   const { isOpen: isCreateDialogOpen, onOpen: onCreateDialogOpen, onToggle: onCreateDialogToggle } = useDisclosure();
   const { isOpen: isEditDialogOpen, onOpen: onEditDialogOpen, onToggle: onEditDialogToggle } = useDisclosure();
@@ -35,10 +36,24 @@ export default function FoldersPage() {
   
   const [selectedFolder, setSelectedFolder] = useState<IFolder | null>(null);
   const [parentForCreate, setParentForCreate] = useState<IFolder | null>(null);
+  const [dropError, setDropError] = useState<string>('');
 
   const rootFolders = getFoldersByParentId(null);
   
   const rootFiles = useMemo(() => allFiles.filter(f => f.folderId === null), [allFiles]);
+
+  const handleFileDrop = async (file: File) => {
+    try {
+      setDropError('');
+      await uploadFile(file, null);
+    } catch (err) {
+      setDropError(err instanceof Error ? err.message : 'Failed to upload file');
+    }
+  };
+
+  const handleFileDropError = (error: string) => {
+    setDropError(error);
+  };
 
   const handleCreateFolder = async (name: string) => {
     await createFolder(name, parentForCreate?.id || null);
@@ -102,6 +117,12 @@ export default function FoldersPage() {
         </div>
       </div>
 
+      {dropError && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive">{dropError}</p>
+        </div>
+      )}
+
       <div className="space-y-8">
         {/* Folders Section */}
         {rootFolders.length > 0 && (
@@ -135,10 +156,13 @@ export default function FoldersPage() {
           <EmptyState
             icon={Folder}
             title="No folders or files yet"
-            description="Create your first folder or upload a file to get started"
+            description="Create your first folder or upload a file to get started, or drag and drop here"
             actionLabel="Create Folder"
             actionIcon={FolderPlus}
             onAction={onCreateDialogOpen}
+            enableFileDrop={true}
+            onFileDrop={handleFileDrop}
+            onFileDropError={handleFileDropError}
           />
         )}
       </div>

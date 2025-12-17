@@ -14,6 +14,7 @@ const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog')
 
 export default function FilesPage() {
   const files = useFileStore((state) => state.files);
+  const uploadFile = useFileStore((state) => state.uploadFile);
   const updateFileName = useFileStore((state) => state.updateFileName);
   const deleteFile = useFileStore((state) => state.deleteFile);
   
@@ -21,6 +22,20 @@ export default function FilesPage() {
   
   const [renamingFile, setRenamingFile] = useState<IFile | null>(null);
   const [deletingFile, setDeletingFile] = useState<IFile | null>(null);
+  const [dropError, setDropError] = useState<string>('');
+
+  const handleFileDrop = async (file: File) => {
+    try {
+      setDropError('');
+      await uploadFile(file, null);
+    } catch (err) {
+      setDropError(err instanceof Error ? err.message : 'Failed to upload file');
+    }
+  };
+
+  const handleFileDropError = (error: string) => {
+    setDropError(error);
+  };
 
   const handleRename = async (newName: string) => {
     if (renamingFile) {
@@ -49,14 +64,23 @@ export default function FilesPage() {
         </Button>
       </div>
 
+      {dropError && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive">{dropError}</p>
+        </div>
+      )}
+
       {files.length === 0 ? (
         <EmptyState
           icon={FileText}
           title="No files yet"
-          description="Upload your first PDF file to get started"
+          description="Upload your first PDF file to get started or drag and drop here"
           actionLabel="Upload File"
           actionIcon={Upload}
           onAction={onUploadDialogOpen}
+          enableFileDrop={true}
+          onFileDrop={handleFileDrop}
+          onFileDropError={handleFileDropError}
         />
       ) : (
         <div className="space-y-4">

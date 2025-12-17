@@ -14,6 +14,8 @@ import { Input } from '@ui/input';
 import { useFileStore } from '@stores/fileStore';
 import { ACCEPTED_FILE_TYPES, ACCEPTED_FILE_MIME_TYPES } from '@constants/files';
 import { fileSizeToMB } from '@lib/file';
+import { useFileDrop } from '@hooks/use-file-drop';
+import { cn } from '@lib/utils';
 
 interface FileUploadDialogProps {
   open: boolean;
@@ -29,6 +31,22 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileDrop = (file: File) => {
+    setError('');
+    setSelectedFile(file);
+  };
+
+  const handleDropError = (errorMessage: string) => {
+    setError(errorMessage);
+    setSelectedFile(null);
+  };
+
+  const { isDragging, dropRef } = useFileDrop({
+    onDrop: handleFileDrop,
+    accept: ACCEPTED_FILE_MIME_TYPES as unknown as string[],
+    onError: handleDropError,
+  });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,16 +124,22 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
 
         <div className="space-y-4">
           <div
+            ref={dropRef}
             role="button"
             tabIndex={0}
-            className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+            className={cn(
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+              isDragging 
+                ? "border-primary bg-primary/5" 
+                : "hover:border-primary"
+            )}
             onClick={handleClickUploadArea}
             onKeyDown={handleKeyDownUploadArea}
-            aria-label="Click to select a PDF file"
+            aria-label="Click to select a PDF file or drag and drop"
           >
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-2">
-              Click to select a PDF file
+              {isDragging ? 'Drop PDF file here' : 'Click to select or drag and drop a PDF file'}
             </p>
             <Input
               ref={fileInputRef}
