@@ -1,5 +1,5 @@
 import { Home, Folder, File } from 'lucide-react';
-import { navigationRoutes } from './routes';
+import { navigationRoutes } from '@constants/routes';
 
 export const menuItems = [
   {

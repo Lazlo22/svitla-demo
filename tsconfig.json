@@ -14,7 +14,10 @@
       "@ui/*": ["./src/components/ui/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@constants/*": ["./src/constants/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@lib/*": ["./src/lib/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@type/*": ["./src/types/*"],
+      "@zod/*": ["./src/zod/*"]
     }
   }
 }
