@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+
 import { Button } from '@ui/button';
 
 interface EmptyStateProps {
@@ -30,3 +31,5 @@ export default function EmptyState({
     </div>
   );
 }
+
+EmptyState.displayName = 'EmptyState';

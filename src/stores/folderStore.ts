@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
 
 import type { IFolder } from '@type/folder';
 import { FOLDERS_STORAGE_KEY, FOLDERS_STORE_NAME } from '@constants/storage';
-import { composeMiddleware } from '@/lib/storage';
+import { composeMiddleware } from '@lib/storage';
 
 interface FolderState {
   folders: IFolder[];

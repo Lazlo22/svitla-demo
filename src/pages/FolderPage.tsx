@@ -9,7 +9,8 @@ import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
 import { FolderBreadcrumb } from '@components/folder/FolderBreadcrumb';
 import { FolderNotFound } from '@components/folder/FolderNotFound';
-import { FileList, FileUploadDialog } from '@components/file';
+import { FileList } from '@components/files/FileList';
+import { FileUploadDialog } from '@components/files/FileUploadDialog';
 import EmptyState from '@components/common/EmptyState';
 import type { IFolder } from '@type/folder';
 

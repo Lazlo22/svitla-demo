@@ -7,7 +7,8 @@ import { useFileStore } from '@stores/fileStore';
 import { useDisclosure } from '@hooks/use-disclosure';
 import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
-import { FileList, FileUploadDialog } from '@components/file';
+import { FileList } from '@components/files/FileList';
+import { FileUploadDialog } from '@components/files/FileUploadDialog';
 import EmptyState from '@components/common/EmptyState';
 import type { IFolder } from '@type/folder';
 
