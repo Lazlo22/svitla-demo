@@ -15,7 +15,7 @@ import { Input } from '@ui/input';
 import { useFileStore, selectUploadFiles } from '@stores/fileStore';
 import { ACCEPTED_FILE_TYPES, ACCEPTED_FILE_MIME_TYPES } from '@constants/files';
 import { fileSizeToMB, formatFileType } from '@lib/file';
-import { useFileDrop } from '@hooks/use-file-drop';
+import { useFileDrop } from '@hooks/useFileDrop';
 import { cn } from '@lib/utils';
 
 interface FileUploadDialogProps {

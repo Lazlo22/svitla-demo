@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 
 import { Button } from '@ui/button';
-import { useFileDrop } from '@hooks/use-file-drop';
+import { useFileDrop } from '@hooks/useFileDrop';
 import { cn } from '@lib/utils';
 
 interface EmptyStateProps {

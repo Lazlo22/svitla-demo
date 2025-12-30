@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useSearch } from '@hooks/use-search';
+import { useSearch } from '@hooks/useSearch';
 import { useFileStore } from '@stores/fileStore';
 import { useFolderStore } from '@stores/folderStore';
 import type { IFile } from '@type/file';

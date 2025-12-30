@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@test/test-utils';
-import { useFileDrop } from '@hooks/use-file-drop';
+import { useFileDrop } from '@hooks/useFileDrop';
 
 describe('useFileDrop', () => {
   it('returns isDragging as false initially', () => {

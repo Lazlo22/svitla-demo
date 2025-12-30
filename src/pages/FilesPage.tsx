@@ -2,8 +2,8 @@ import { useState, lazy } from 'react';
 import { FileText, Upload } from 'lucide-react';
 
 import { useFileStore, selectFiles, useFileActions } from '@stores/fileStore';
-import { useDisclosure } from '@hooks/use-disclosure';
-import { useSearch } from '@hooks/use-search';
+import { useDisclosure } from '@hooks/useDisclosure';
+import { useSearch } from '@hooks/useSearch';
 import { Button } from '@ui/button';
 import { FileItem } from '@components/files/FileItem';
 import { SearchBar } from '@components/common/SearchBar';

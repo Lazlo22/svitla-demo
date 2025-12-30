@@ -4,8 +4,8 @@ import { FolderPlus, Upload } from 'lucide-react';
 
 import { useFolderActions, useFolderGetters } from '@stores/folderStore';
 import { useFileStore, selectFiles, selectUploadFile } from '@stores/fileStore';
-import { useDisclosure } from '@hooks/use-disclosure';
-import { useSearch } from '@hooks/use-search';
+import { useDisclosure } from '@hooks/useDisclosure';
+import { useSearch } from '@hooks/useSearch';
 import { Button } from '@ui/button';
 import { FolderCard } from '@components/folders/FolderCard';
 import { FolderBreadcrumb } from '@components/folder/FolderBreadcrumb';
