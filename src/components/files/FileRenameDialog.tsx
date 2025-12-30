@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@ui/button';
 import {
@@ -20,25 +20,21 @@ interface FileRenameDialogProps {
 export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: FileRenameDialogProps) {
   const [newName, setNewName] = useState('');
 
+  useEffect(() => {
+    if (open) {
+      setNewName(fileName.replace(/\.pdf$/i, ''));
+    }
+  }, [open, fileName]);
+
   const handleRename = async () => {
     if (newName.trim()) {
       await onRename(newName.trim());
       onOpenChange(false);
-      setNewName('');
     }
-  };
-
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      setNewName(fileName.replace(/\.pdf$/i, ''));
-    } else {
-      setNewName('');
-    }
-    onOpenChange(isOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rename File</DialogTitle>
@@ -50,6 +46,7 @@ export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: Fil
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Enter file name"
+              autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleRename();

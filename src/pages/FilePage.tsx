@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Download, Pencil, Trash2 } from 'lucide-react';
-import { useState, lazy, useMemo } from 'react';
+import { useState, lazy } from 'react';
 
 import { Button } from '@ui/button';
+import { Badge } from '@ui/badge';
 import { useFileStore, selectFiles, selectUpdateFileName, selectDeleteFile } from '@stores/fileStore';
-import { fileSizeToMB } from '@lib/file';
+import { fileSizeToMB, formatFileType } from '@lib/file';
 import { FileNotFound } from '@components/file/FileNotFound';
 import { FileViewer } from '@components/file/FileViewer';
 
@@ -26,12 +27,14 @@ export default function FilePage() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  const file = useMemo(() => files.find(f => f.id === id), [files, id]);
+  // Remove useMemo to ensure file updates are reflected immediately
+  const file = files.find(f => f.id === id);
 
   const handleRename = async (newName: string) => {
     if (!file) return;
 
     await updateFileName(file.id, newName);
+    setShowRenameDialog(false);
   };
 
   const handleDelete = async () => {
@@ -70,9 +73,12 @@ export default function FilePage() {
               </Button>
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl font-semibold truncate max-w-[800px]">{file.name}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {fileSizeToMB(file.size)} MB
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{formatFileType(file.type)}</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {fileSizeToMB(file.size)} MB
+                  </span>
+                </div>
               </div>
             </div>
             

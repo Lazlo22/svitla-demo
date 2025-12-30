@@ -2,7 +2,7 @@ import { useDrop } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 
 interface UseFileDropOptions {
-  onDrop: (file: File) => void;
+  onDrop: (files: File[]) => void;
   accept?: string[];
   onError?: (error: string) => void;
 }
@@ -28,15 +28,14 @@ export function useFileDrop({
           return;
         }
 
-        const file = files[0];
-
-        // Validate file type
-        if (!accept.includes(file.type)) {
+        // Validate all file types
+        const invalidFiles = files.filter(file => !accept.includes(file.type));
+        if (invalidFiles.length > 0) {
           onError?.('Only PDF files are supported');
           return;
         }
 
-        onDrop(file);
+        onDrop(files);
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),

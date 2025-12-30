@@ -28,7 +28,7 @@ export default function EmptyState({
   onFileDropError,
 }: EmptyStateProps) {
   const { isDragging, dropRef } = useFileDrop({
-    onDrop: (file) => onFileDrop?.(file),
+    onDrop: (files) => onFileDrop?.(files[0]),
     accept: ['application/pdf'],
     onError: (error) => onFileDropError?.(error),
   });

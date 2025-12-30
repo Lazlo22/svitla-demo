@@ -95,6 +95,76 @@ describe('fileStore', () => {
     });
   });
 
+  describe('uploadFiles', () => {
+    it('uploads multiple PDF files', async () => {
+      const store = useFileStore.getState();
+      const mockFiles = [
+        createMockPdfFile('file1.pdf'),
+        createMockPdfFile('file2.pdf'),
+        createMockPdfFile('file3.pdf'),
+      ];
+      
+      const files = await store.uploadFiles(mockFiles, null);
+      
+      expect(files).toHaveLength(3);
+      expect(files[0].name).toBe('file1.pdf');
+      expect(files[1].name).toBe('file2.pdf');
+      expect(files[2].name).toBe('file3.pdf');
+      expect(useFileStore.getState().files).toHaveLength(3);
+    });
+
+    it('handles duplicate names across multiple files', async () => {
+      const store = useFileStore.getState();
+      const mockFiles = [
+        createMockPdfFile('test.pdf'),
+        createMockPdfFile('test.pdf'),
+        createMockPdfFile('test.pdf'),
+      ];
+      
+      const files = await store.uploadFiles(mockFiles, null);
+      
+      expect(files[0].name).toBe('test.pdf');
+      expect(files[1].name).toBe('test (1).pdf');
+      expect(files[2].name).toBe('test (2).pdf');
+    });
+
+    it('rejects all files if any are non-PDF', async () => {
+      const store = useFileStore.getState();
+      const mockFiles = [
+        createMockPdfFile('file1.pdf'),
+        createMockTextFile('file2.txt'),
+        createMockPdfFile('file3.pdf'),
+      ];
+      
+      await expect(store.uploadFiles(mockFiles, null)).rejects.toThrow();
+      
+      // No files should be uploaded if any fail
+      expect(useFileStore.getState().files).toHaveLength(0);
+    });
+
+    it('uploads files to specific folder', async () => {
+      const store = useFileStore.getState();
+      const folderId = 'folder-123';
+      const mockFiles = [
+        createMockPdfFile('file1.pdf'),
+        createMockPdfFile('file2.pdf'),
+      ];
+      
+      const files = await store.uploadFiles(mockFiles, folderId);
+      
+      expect(files[0].folderId).toBe(folderId);
+      expect(files[1].folderId).toBe(folderId);
+    });
+
+    it('returns empty array for empty file list', async () => {
+      const store = useFileStore.getState();
+      
+      const files = await store.uploadFiles([], null);
+      
+      expect(files).toHaveLength(0);
+    });
+  });
+
   describe('updateFileName', () => {
     it('updates file name', async () => {
       const store = useFileStore.getState();

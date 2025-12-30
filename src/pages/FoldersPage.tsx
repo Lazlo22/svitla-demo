@@ -1,4 +1,4 @@
-import { useState, lazy, useMemo } from 'react';
+import { useState, lazy } from 'react';
 import { useNavigate } from 'react-router';
 import { FolderPlus, Folder, Upload } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function FoldersPage() {
 
   const rootFolders = getFoldersByParentId(null);
   
-  const rootFiles = useMemo(() => allFiles.filter(f => f.folderId === null), [allFiles]);
+  const rootFiles = allFiles.filter(f => f.folderId === null);
 
   const displayFolders = isSearching ? searchResults.folders : rootFolders;
   const displayFiles = isSearching ? searchResults.files : rootFiles;

@@ -78,12 +78,30 @@ export const useFolderStore = create<FolderState>()(
         },
 
         updateFolder: async (id: string, name: string) => {
+          const folder = get().getFolderById(id);
+          if (!folder) return;
+
+          // Get all folders with the same parent (excluding the current folder)
+          const siblingFolders = get().getFoldersByParentId(folder.parentId).filter((f: IFolder) => f.id !== id);
+          const existingNames = new Set(siblingFolders.map((f: IFolder) => f.name.toLowerCase()));
+          
+          // Generate unique name if needed
+          let uniqueName = name;
+
+          if (existingNames.has(name.toLowerCase())) {
+            let counter = 1;
+            while (existingNames.has(`${name} (${counter})`.toLowerCase())) {
+              counter++;
+            }
+            uniqueName = `${name} (${counter})`;
+          }
+
           set((state) => {
-            const folder = state.folders.find((f: IFolder) => f.id === id);
+            const folderToUpdate = state.folders.find((f: IFolder) => f.id === id);
             
-            if (folder) {
-              folder.name = name;
-              folder.updatedAt = Date.now();
+            if (folderToUpdate) {
+              folderToUpdate.name = uniqueName;
+              folderToUpdate.updatedAt = Date.now();
             }
           });
         },

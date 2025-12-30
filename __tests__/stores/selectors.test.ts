@@ -16,6 +16,7 @@ import {
   selectFiles,
   selectFilesCount,
   selectUploadFile,
+  selectUploadFiles,
   selectUpdateFileName,
   selectDeleteFile,
 } from '@stores/fileStore';
@@ -132,6 +133,12 @@ describe('File Store Selectors', () => {
     const uploadFile = selectUploadFile(useFileStore.getState());
     
     expect(typeof uploadFile).toBe('function');
+  });
+
+  it('selectUploadFiles returns uploadFiles function', () => {
+    const uploadFiles = selectUploadFiles(useFileStore.getState());
+    
+    expect(typeof uploadFiles).toBe('function');
   });
 
   it('selectUpdateFileName returns updateFileName function', () => {

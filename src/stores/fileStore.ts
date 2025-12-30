@@ -13,6 +13,7 @@ interface FileState {
   
   // Actions
   uploadFile: (file: File, folderId: string | null) => Promise<IFile>;
+  uploadFiles: (files: File[], folderId: string | null) => Promise<IFile[]>;
   updateFileName: (id: string, name: string) => Promise<void>;
   deleteFile: (id: string) => Promise<void>;
   getFileById: (id: string) => IFile | undefined;
@@ -95,15 +96,113 @@ export const useFileStore = create<FileState>()(
         return newFile;
       },
 
+      uploadFiles: async (files: File[], folderId: string | null) => {
+        // Validate all files first before uploading any
+        const invalidFiles = files.filter(file => 
+          !ACCEPTED_FILE_MIME_TYPES.includes(file.type as typeof ACCEPTED_FILE_MIME_TYPES[number])
+        );
+        
+        if (invalidFiles.length > 0) {
+          const errorMessages = invalidFiles.map(f => `${f.name}: Only PDF files are supported`);
+          throw new Error(errorMessages.join('\n'));
+        }
+
+        const uploadedFiles: IFile[] = [];
+        const errors: string[] = [];
+
+        // Get existing files in the same folder
+        const siblingFiles = get().getFilesByFolderId(folderId);
+        const existingNames = new Set(siblingFiles.map((f: IFile) => {
+          const nameWithoutExt = f.name.replace(/\.pdf$/i, '');
+          return nameWithoutExt.toLowerCase();
+        }));
+
+        for (const file of files) {
+          try {
+            // Convert file to base64
+            const content = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+
+            // Generate unique name
+            const originalName = file.name.replace(/\.pdf$/i, '');
+            let uniqueName = originalName;
+
+            if (existingNames.has(originalName.toLowerCase())) {
+              let counter = 1;
+              while (existingNames.has(`${originalName} (${counter})`.toLowerCase())) {
+                counter++;
+              }
+              uniqueName = `${originalName} (${counter})`;
+            }
+
+            // Add to existing names set for next iteration
+            existingNames.add(uniqueName.toLowerCase());
+
+            const newFile: IFile = {
+              id: crypto.randomUUID(),
+              name: `${uniqueName}.pdf`,
+              folderId,
+              type: 'application/pdf',
+              size: file.size,
+              content,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            };
+
+            uploadedFiles.push(newFile);
+          } catch (err) {
+            errors.push(`${file.name}: ${err instanceof Error ? err.message : 'Failed to upload'}`);
+          }
+        }
+
+        // If there were any errors during upload, throw them without saving
+        if (errors.length > 0) {
+          throw new Error(errors.join('\n'));
+        }
+
+        // Add all successfully uploaded files to state
+        if (uploadedFiles.length > 0) {
+          set((state) => {
+            state.files.push(...uploadedFiles);
+          });
+        }
+
+        return uploadedFiles;
+      },
+
       updateFileName: async (id: string, name: string) => {
+        const file = get().getFileById(id);
+        if (!file) return;
+
+        // Get existing files in the same folder (excluding the current file)
+        const siblingFiles = get().getFilesByFolderId(file.folderId).filter((f: IFile) => f.id !== id);
+        const existingNames = new Set(siblingFiles.map((f: IFile) => {
+          const nameWithoutExt = f.name.replace(/\.pdf$/i, '');
+          return nameWithoutExt.toLowerCase();
+        }));
+
+        // Generate unique name if needed
+        const nameWithoutExt = name.replace(/\.pdf$/i, '');
+        let uniqueName = nameWithoutExt;
+
+        if (existingNames.has(nameWithoutExt.toLowerCase())) {
+          let counter = 1;
+          while (existingNames.has(`${nameWithoutExt} (${counter})`.toLowerCase())) {
+            counter++;
+          }
+          uniqueName = `${nameWithoutExt} (${counter})`;
+        }
+
         set((state) => {
-          const file = state.files.find((f: IFile) => f.id === id);
+          const fileToUpdate = state.files.find((f: IFile) => f.id === id);
           
-          if (file) {
-            // Ensure .pdf extension
-            const newName = name.endsWith('.pdf') ? name : `${name}.pdf`;
-            file.name = newName;
-            file.updatedAt = Date.now();
+          if (fileToUpdate) {
+            fileToUpdate.name = `${uniqueName}.pdf`;
+            fileToUpdate.updatedAt = Date.now();
           }
         });
       },
@@ -132,6 +231,7 @@ export const useFileStore = create<FileState>()(
 export const selectFiles = (state: FileState) => state.files;
 export const selectFilesCount = (state: FileState) => state.files.length;
 export const selectUploadFile = (state: FileState) => state.uploadFile;
+export const selectUploadFiles = (state: FileState) => state.uploadFiles;
 export const selectUpdateFileName = (state: FileState) => state.updateFileName;
 export const selectDeleteFile = (state: FileState) => state.deleteFile;
 
@@ -139,6 +239,7 @@ export const useFileActions = () =>
   useFileStore(
     useShallow((state) => ({
       uploadFile: state.uploadFile,
+      uploadFiles: state.uploadFiles,
       updateFileName: state.updateFileName,
       deleteFile: state.deleteFile,
     }))

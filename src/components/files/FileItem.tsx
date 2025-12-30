@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router';
 import { FileText, Pencil, Trash2 } from 'lucide-react';
 
 import { Button } from '@ui/button';
+import { Badge } from '@ui/badge';
 import type { IFile } from '@type/file';
-import { fileSizeToMB } from '@lib/file';
+import { fileSizeToMB, formatFileType } from '@lib/file';
 
 interface FileItemProps {
   file: IFile;
@@ -45,12 +46,15 @@ export function FileItem({ file, onRename, onDelete }: FileItemProps) {
       aria-label={`View ${file.name}`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <FileText className="size-6 flex-shrink-0" />
+        <FileText className="size-8 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{file.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {fileSizeToMB(file.size)} MB
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge className="text-xs">{formatFileType(file.type)}</Badge>
+            <span className="text-xs text-muted-foreground">
+              {fileSizeToMB(file.size)} MB
+            </span>
+          </div>
         </div>
       </div>
 

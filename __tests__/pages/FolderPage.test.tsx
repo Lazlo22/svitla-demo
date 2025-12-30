@@ -227,4 +227,48 @@ describe('FolderPage', () => {
       expect(screen.getByText('No results found')).toBeInTheDocument();
     });
   });
+
+  it('updates file name immediately after rename in folder', async () => {
+    const user = userEvent.setup();
+
+    act(() => {
+      useFileStore.setState({ files: [mockFile] });
+    });
+
+    render(<FolderPage />);
+
+    // Wait for file to appear
+    expect(await screen.findByText('test-document.pdf')).toBeInTheDocument();
+
+    // Find and click the rename button (it's in the FileItem component)
+    const fileItem = screen.getByText('test-document.pdf').closest('[role="button"]');
+    expect(fileItem).toBeInTheDocument();
+    
+    // Hover to show the rename button
+    await user.hover(fileItem!);
+    
+    // Click rename button
+    const renameButton = screen.getByTitle('Rename');
+    await user.click(renameButton);
+
+    // Wait for dialog
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    // Change the name
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, 'renamed-in-folder');
+
+    // Save
+    const saveButton = screen.getByRole('button', { name: /rename/i });
+    await user.click(saveButton);
+
+    // Verify the name updates immediately
+    await waitFor(() => {
+      expect(screen.getByText('renamed-in-folder.pdf')).toBeInTheDocument();
+      expect(screen.queryByText('test-document.pdf')).not.toBeInTheDocument();
+    });
+  });
 });

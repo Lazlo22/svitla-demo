@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, X } from 'lucide-react';
 
 import { Button } from '@ui/button';
+import { Badge } from '@ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -11,9 +12,9 @@ import {
   DialogTitle,
 } from '@ui/dialog';
 import { Input } from '@ui/input';
-import { useFileStore, selectUploadFile } from '@stores/fileStore';
+import { useFileStore, selectUploadFiles } from '@stores/fileStore';
 import { ACCEPTED_FILE_TYPES, ACCEPTED_FILE_MIME_TYPES } from '@constants/files';
-import { fileSizeToMB } from '@lib/file';
+import { fileSizeToMB, formatFileType } from '@lib/file';
 import { useFileDrop } from '@hooks/use-file-drop';
 import { cn } from '@lib/utils';
 
@@ -24,22 +25,22 @@ interface FileUploadDialogProps {
 }
 
 export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDialogProps) {
-  const uploadFile = useFileStore(selectUploadFile);
+  const uploadFiles = useFileStore(selectUploadFiles);
   
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [error, setError] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileDrop = (file: File) => {
+  const handleFileDrop = (files: File[]) => {
     setError('');
-    setSelectedFile(file);
+    setSelectedFiles(files);
   };
 
   const handleDropError = (errorMessage: string) => {
     setError(errorMessage);
-    setSelectedFile(null);
+    setSelectedFiles([]);
   };
 
   const { isDragging, dropRef } = useFileDrop({
@@ -49,43 +50,47 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
   });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
     
     setError('');
     
-    if (file) {
-      if (!ACCEPTED_FILE_MIME_TYPES.includes(file.type as typeof ACCEPTED_FILE_MIME_TYPES[number])) {
+    if (files.length > 0) {
+      const invalidFiles = files.filter(file => 
+        !ACCEPTED_FILE_MIME_TYPES.includes(file.type as typeof ACCEPTED_FILE_MIME_TYPES[number])
+      );
+      
+      if (invalidFiles.length > 0) {
         setError('Only PDF files are supported');
-        setSelectedFile(null);
+        setSelectedFiles([]);
         return;
       }
-      setSelectedFile(file);
+      setSelectedFiles(files);
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
     setError('');
 
     try {
-      await uploadFile(selectedFile, folderId);
-      setSelectedFile(null);
+      await uploadFiles(selectedFiles, folderId);
+      setSelectedFiles([]);
       onOpenChange(false);
 
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload file');
+      setError(err instanceof Error ? err.message : 'Failed to upload files');
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleCancel = () => {
-    setSelectedFile(null);
+    setSelectedFiles([]);
     setError('');
     onOpenChange(false);
     
@@ -105,8 +110,8 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
     }
   };
 
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -116,9 +121,9 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Upload PDF File</DialogTitle>
+          <DialogTitle>Upload PDF Files</DialogTitle>
           <DialogDescription>
-            Select a PDF file to upload to this folder
+            Select one or more PDF files to upload to this folder
           </DialogDescription>
         </DialogHeader>
 
@@ -135,11 +140,11 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
             )}
             onClick={handleClickUploadArea}
             onKeyDown={handleKeyDownUploadArea}
-            aria-label="Click to select a PDF file or drag and drop"
+            aria-label="Click to select PDF files or drag and drop"
           >
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-2">
-              {isDragging ? 'Drop PDF file here' : 'Click to select or drag and drop a PDF file'}
+              {isDragging ? 'Drop PDF files here' : 'Click to select or drag and drop PDF files'}
             </p>
             <Input
               ref={fileInputRef}
@@ -148,31 +153,39 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
               onChange={handleFileSelect}
               className="hidden"
               aria-hidden="true"
+              multiple
             />
           </div>
 
-          {selectedFile ? (
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex-1 max-w-full">
-                <p className="text-sm font-medium" title={selectedFile.name}>
-                  {selectedFile.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {fileSizeToMB(selectedFile.size)} MB
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveFile}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+          {selectedFiles.length > 0 ? (
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex-1 max-w-full">
+                    <p className="text-sm font-medium" title={file.name}>
+                      {file.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge className="text-xs">{formatFileType(file.type)}</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {fileSizeToMB(file.size)} MB
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveFile(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
           ) : null}
 
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-destructive whitespace-pre-line">{error}</p>
           )}
         </div>
 
@@ -180,8 +193,8 @@ export function FileUploadDialog({ open, onOpenChange, folderId }: FileUploadDia
           <Button variant="outline" onClick={handleCancel} disabled={isUploading}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} disabled={!selectedFile || isUploading}>
-            {isUploading ? 'Uploading...' : 'Upload'}
+          <Button onClick={handleUpload} disabled={selectedFiles.length === 0 || isUploading}>
+            {isUploading ? 'Uploading...' : `Upload ${selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}`}
           </Button>
         </DialogFooter>
       </DialogContent>
