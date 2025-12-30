@@ -8,6 +8,8 @@ import {
 import { BrowserRouter } from 'react-router';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { FileDialogsProvider } from '@context/FileDialogsContext';
+import { FolderDialogsProvider } from '@context/FolderDialogsContext';
 
 interface WrapperProps {
   children: ReactNode;
@@ -16,7 +18,13 @@ interface WrapperProps {
 function AllProviders({ children }: WrapperProps) {
   return (
     <BrowserRouter>
-      <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+      <DndProvider backend={HTML5Backend}>
+        <FileDialogsProvider>
+          <FolderDialogsProvider>
+            {children}
+          </FolderDialogsProvider>
+        </FileDialogsProvider>
+      </DndProvider>
     </BrowserRouter>
   );
 }

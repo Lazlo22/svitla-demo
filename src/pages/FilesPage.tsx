@@ -1,56 +1,52 @@
-import { useState, lazy } from 'react';
 import { FileText, Upload } from 'lucide-react';
 
-import { useFileStore, selectFiles, useFileActions } from '@stores/fileStore';
-import { useDisclosure } from '@hooks/useDisclosure';
 import { useSearch } from '@hooks/useSearch';
+import { useFileListOperations } from '@hooks/useFileListOperations';
+import { useFileDialogs } from '@context/FileDialogsContext';
 import { Button } from '@ui/button';
 import { FileItem } from '@components/files/FileItem';
 import { SearchBar } from '@components/common/SearchBar';
 import EmptyState from '@components/common/EmptyState';
-import type { IFile } from '@type/file';
-
-const FileUploadDialog = lazy(() => import('@components/files/FileUploadDialog').then(m => ({ default: m.FileUploadDialog })));
-const FileRenameDialog = lazy(() => import('@components/files/FileRenameDialog').then(m => ({ default: m.FileRenameDialog })));
-const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog').then(m => ({ default: m.FileDeleteDialog })));
+import type { IFile } from '@/types/file';
 
 export default function FilesPage() {
-  const files = useFileStore(selectFiles);
-  const { uploadFile, updateFileName, deleteFile } = useFileActions();
+  const {
+    files,
+    dropError,
+    setRenamingFile,
+    setDeletingFile,
+    handleFileDrop,
+    handleFileDropError,
+    handleRename,
+    handleDelete,
+  } = useFileListOperations(null);
   
   const { searchQuery, setSearchQuery, searchResults, isSearching } = useSearch();
-  const { isOpen: isUploadDialogOpen, onOpen: onUploadDialogOpen, onToggle: onUploadDialogToggle } = useDisclosure();
-  
-  const [renamingFile, setRenamingFile] = useState<IFile | null>(null);
-  const [deletingFile, setDeletingFile] = useState<IFile | null>(null);
-  const [dropError, setDropError] = useState<string>('');
+  const { openUploadDialog, openRenameDialog, openDeleteDialog } = useFileDialogs();
 
   const displayFiles = isSearching ? searchResults.files : files;
 
-  const handleFileDrop = async (file: File) => {
-    try {
-      setDropError('');
-      await uploadFile(file, null);
-    } catch (err) {
-      setDropError(err instanceof Error ? err.message : 'Failed to upload file');
+  const handleUploadClick = () => openUploadDialog(null);
+
+  const handleRenameClick = (file: IFile | null) => {
+    if (file) {
+      openRenameDialog(file, async (newName) => {
+        setRenamingFile(file);
+        await handleRename(newName);
+      });
     }
   };
 
-  const handleFileDropError = (error: string) => {
-    setDropError(error);
-  };
-
-  const handleRename = async (newName: string) => {
-    if (renamingFile) {
-      await updateFileName(renamingFile.id, newName);
+  const handleDeleteClick = (file: IFile | null) => {
+    if (file) {
+      openDeleteDialog(file, async () => {
+        setDeletingFile(file);
+        await handleDelete();
+      });
     }
   };
 
-  const handleDelete = async () => {
-    if (deletingFile) {
-      await deleteFile(deletingFile.id);
-    }
-  };
+  const isEmptyFileList = files.length === 0 && !isSearching;
 
   return (
     <div className="container mx-auto p-6 py-0 max-w-6xl">
@@ -61,7 +57,7 @@ export default function FilesPage() {
             View and manage all your PDF files
           </p>
         </div>
-        <Button onClick={onUploadDialogOpen}>
+        <Button onClick={handleUploadClick}>
           <Upload className="mr-2 h-4 w-4" />
           Upload File
         </Button>
@@ -80,14 +76,14 @@ export default function FilesPage() {
         className="mb-6"
       />
 
-      {displayFiles.length === 0 ? (
+      {isEmptyFileList ? (
         <EmptyState
           icon={FileText}
           title={isSearching ? "No results found" : "No files yet"}
           description={isSearching ? `No files match "${searchQuery}"` : "Upload your first PDF file to get started or drag and drop here"}
           actionLabel="Upload File"
           actionIcon={Upload}
-          onAction={onUploadDialogOpen}
+          onAction={handleUploadClick}
           enableFileDrop={!isSearching}
           onFileDrop={handleFileDrop}
           onFileDropError={handleFileDropError}
@@ -100,33 +96,13 @@ export default function FilesPage() {
               <FileItem
                 key={file.id}
                 file={file}
-                onRename={setRenamingFile}
-                onDelete={setDeletingFile}
+                onRename={handleRenameClick}
+                onDelete={handleDeleteClick}
               />
             ))}
           </div>
         </div>
       )}
-
-      <FileUploadDialog
-        open={isUploadDialogOpen}
-        onOpenChange={onUploadDialogToggle}
-        folderId={null}
-      />
-
-      <FileRenameDialog
-        open={!!renamingFile}
-        onOpenChange={(open) => !open && setRenamingFile(null)}
-        fileName={renamingFile?.name || ''}
-        onRename={handleRename}
-      />
-
-      <FileDeleteDialog
-        open={!!deletingFile}
-        onOpenChange={(open) => !open && setDeletingFile(null)}
-        fileName={deletingFile?.name || ''}
-        onDelete={handleDelete}
-      />
     </div>
   );
 }

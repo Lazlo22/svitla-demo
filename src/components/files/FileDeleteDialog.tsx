@@ -12,12 +12,12 @@ interface FileDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fileName: string;
-  onDelete: () => Promise<void>;
+  onDelete: () => void;
 }
 
-export function FileDeleteDialog({ open, onOpenChange, fileName, onDelete }: FileDeleteDialogProps) {
-  const handleDelete = async () => {
-    await onDelete();
+export default function FileDeleteDialog({ open, onOpenChange, fileName, onDelete }: FileDeleteDialogProps) {
+  const handleDelete = () => {
+    onDelete();
     onOpenChange(false);
   };
 
@@ -42,5 +42,3 @@ export function FileDeleteDialog({ open, onOpenChange, fileName, onDelete }: Fil
     </Dialog>
   );
 }
-
-FileDeleteDialog.displayName = 'FileDeleteDialog';

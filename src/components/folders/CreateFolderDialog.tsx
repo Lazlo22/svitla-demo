@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@ui/dialog';
 import { Button } from '@ui/button';
 import { Input } from '@ui/input';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@ui/form';
@@ -46,6 +46,7 @@ export default function CreateFolderDialog({
           <DialogTitle>
             Create New Folder {parentFolderName && `in "${parentFolderName}"`}
           </DialogTitle>
+          <DialogDescription>Enter a name for the new folder</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

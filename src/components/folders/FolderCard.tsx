@@ -40,7 +40,7 @@ export function FolderCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => onCreateSubfolder(e)}
+            onClick={onCreateSubfolder}
             title="Create subfolder"
           >
             <FolderPlus className="size-5" />
@@ -48,7 +48,7 @@ export function FolderCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => onEdit(e)}
+            onClick={onEdit}
             title="Rename"
           >
             <Edit className="size-5" />
@@ -56,7 +56,7 @@ export function FolderCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => onDelete(e)}
+            onClick={onDelete}
             title="Delete"
           >
             <Trash2 className="size-5 text-destructive" />

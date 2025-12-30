@@ -35,7 +35,6 @@ export function FolderBreadcrumb({ breadcrumbs }: FolderBreadcrumbProps) {
             </Button>
           </BreadcrumbLink>
         </BreadcrumbItem>
-
         {breadcrumbs.map((folder, index) => (
           <React.Fragment key={folder.id}>
             <BreadcrumbSeparator />

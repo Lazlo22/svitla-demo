@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 
 import { Button } from '@ui/button';
+import { isEnterPress } from '@lib/keyboard';
+import { removeFileExtension } from '@lib/file';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -14,22 +17,28 @@ interface FileRenameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fileName: string;
-  onRename: (newName: string) => Promise<void>;
+  onRename: (newName: string) => void;
 }
 
-export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: FileRenameDialogProps) {
+export default function FileRenameDialog({ open, onOpenChange, fileName, onRename }: FileRenameDialogProps) {
   const [newName, setNewName] = useState('');
 
   useEffect(() => {
     if (open) {
-      setNewName(fileName.replace(/\.pdf$/i, ''));
+      setNewName(removeFileExtension(fileName));
     }
   }, [open, fileName]);
 
-  const handleRename = async () => {
+  const handleRename = () => {
     if (newName.trim()) {
-      await onRename(newName.trim());
+      onRename(newName.trim());
       onOpenChange(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isEnterPress(e)) {
+      handleRename();
     }
   };
 
@@ -38,6 +47,7 @@ export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: Fil
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rename File</DialogTitle>
+          <DialogDescription>Enter a new name for this file</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -47,11 +57,7 @@ export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: Fil
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Enter file name"
               autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleRename();
-                }
-              }}
+              onKeyDown={handleKeyDown}
             />
           </div>
         </div>
@@ -67,5 +73,3 @@ export function FileRenameDialog({ open, onOpenChange, fileName, onRename }: Fil
     </Dialog>
   );
 }
-
-FileRenameDialog.displayName = 'FileRenameDialog';

@@ -57,7 +57,6 @@ export function FileViewer({ file, className = '' }: FileViewerProps) {
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
       />
-      
       <div className="flex-1 overflow-auto bg-muted/30 flex items-start justify-center p-4">
         <Document
           file={file.content}

@@ -4,6 +4,8 @@ import { createBrowserRouter } from 'react-router';
 // Lazy load all components
 const RootLayout = lazy(() => import('@layouts/RootLayout'));
 const DndLayout = lazy(() => import('@layouts/DndLayout'));
+const FileDialogsLayout = lazy(() => import('@layouts/FileDialogsLayout'));
+const FolderDialogsLayout = lazy(() => import('@layouts/FolderDialogsLayout'));
 const ErrorPage = lazy(() => import('@pages/ErrorPage'));
 const HomePage = lazy(() => import('@pages/HomePage'));
 const FoldersPage = lazy(() => import('@pages/FoldersPage'));
@@ -53,26 +55,36 @@ export const router = createBrowserRouter([
         element: <DndLayout />,
         children: [
           {
-            path: navigationRoutes.folders.path,
-            id: navigationRoutes.folders.name,
-            element: <FoldersPage />,
-          },
-          {
-            path: navigationRoutes.files.path,
-            id: navigationRoutes.files.name,
-            element: <FilesPage />,
-          },
-          {
-            path: navigationRoutes.folder.path,
-            id: navigationRoutes.folder.name,
-            element: <FolderPage />,
+            element: <FileDialogsLayout />,
+            children: [
+              {
+                path: navigationRoutes.file.path,
+                id: navigationRoutes.file.name,
+                element: <FilePage />,
+              },
+              {
+                path: navigationRoutes.files.path,
+                id: navigationRoutes.files.name,
+                element: <FilesPage />,
+              },
+              {
+                element: <FolderDialogsLayout />,
+                children: [
+                  {
+                    path: navigationRoutes.folders.path,
+                    id: navigationRoutes.folders.name,
+                    element: <FoldersPage />,
+                  },
+                  {
+                    path: navigationRoutes.folder.path,
+                    id: navigationRoutes.folder.name,
+                    element: <FolderPage />,
+                  },
+                ],
+              },
+            ],
           },
         ],
-      },
-      {
-        path: navigationRoutes.file.path,
-        id: navigationRoutes.file.name,
-        element: <FilePage />,
       },
       {
         path: navigationRoutes.error.path,

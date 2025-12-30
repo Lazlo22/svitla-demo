@@ -5,6 +5,7 @@ import { Button } from '@ui/button';
 import { Badge } from '@ui/badge';
 import type { IFile } from '@type/file';
 import { fileSizeToMB, formatFileType } from '@lib/file';
+import { isActivationKey } from '@lib/keyboard';
 
 interface FileItemProps {
   file: IFile;
@@ -30,7 +31,7 @@ export function FileItem({ file, onRename, onDelete }: FileItemProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (isActivationKey(e)) {
       e.preventDefault();
       handleClick();
     }

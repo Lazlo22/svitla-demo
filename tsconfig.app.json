@@ -37,7 +37,8 @@
       "@lib/*": ["./src/lib/*"],
       "@stores/*": ["./src/stores/*"],
       "@type/*": ["./src/types/*"],
-      "@zod/*": ["./src/zod/*"]
+      "@zod/*": ["./src/zod/*"],
+      "@context/*": ["./src/context/*"]
     }
   },
   "include": ["src"]

@@ -1,16 +1,14 @@
-import { useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { ArrowLeft, Download, Pencil, Trash2 } from 'lucide-react';
-import { useState, lazy } from 'react';
 
 import { Button } from '@ui/button';
 import { Badge } from '@ui/badge';
-import { useFileStore, selectFiles, selectUpdateFileName, selectDeleteFile } from '@stores/fileStore';
+import { useFileOperations } from '@hooks/useFileOperations';
+import { useBackNavigation } from '@hooks/useBackNavigation';
+import { useFileDialogs } from '@context/FileDialogsContext';
 import { fileSizeToMB, formatFileType } from '@lib/file';
 import { FileNotFound } from '@components/file/FileNotFound';
 import { FileViewer } from '@components/file/FileViewer';
-
-const FileRenameDialog = lazy(() => import('@components/files/FileRenameDialog').then(m => ({ default: m.FileRenameDialog })));
-const FileDeleteDialog = lazy(() => import('@components/files/FileDeleteDialog').then(m => ({ default: m.FileDeleteDialog })));
 
 interface FilePageParams {
   id: string;
@@ -18,39 +16,21 @@ interface FilePageParams {
 
 export default function FilePage() {
   const { id } = useParams<Readonly<FilePageParams>>();
-  const navigate = useNavigate();
+  const { goBack } = useBackNavigation();
   
-  const files = useFileStore(selectFiles);
-  const updateFileName = useFileStore(selectUpdateFileName);
-  const deleteFile = useFileStore(selectDeleteFile);
-  
-  const [showRenameDialog, setShowRenameDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  
-  // Remove useMemo to ensure file updates are reflected immediately
-  const file = files.find(f => f.id === id);
+  const { file, renameFile, deleteFile, downloadFile } = useFileOperations(id);
+  const { openRenameDialog, openDeleteDialog } = useFileDialogs();
 
-  const handleRename = async (newName: string) => {
-    if (!file) return;
-
-    await updateFileName(file.id, newName);
-    setShowRenameDialog(false);
+  const handleRenameClick = () => {
+    if (file) {
+      openRenameDialog(file, renameFile);
+    }
   };
 
-  const handleDelete = async () => {
-    if (!file) return;
-
-    await deleteFile(file.id);
-    navigate('/files');
-  };
-
-  const handleDownload = () => {
-    if (!file) return;
-
-    const link = document.createElement('a');
-    link.href = file.content;
-    link.download = file.name;
-    link.click();
+  const handleDeleteClick = () => {
+    if (file) {
+      openDeleteDialog(file, deleteFile);
+    }
   };
 
   if (!file) {
@@ -66,7 +46,7 @@ export default function FilePage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate(-1)}
+                onClick={goBack}
                 title="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -86,7 +66,7 @@ export default function FilePage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={handleDownload}
+                onClick={downloadFile}
                 title="Download"
               >
                 <Download className="h-5 w-5" />
@@ -94,7 +74,7 @@ export default function FilePage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setShowRenameDialog(true)}
+                onClick={handleRenameClick}
                 title="Rename"
               >
                 <Pencil className="h-5 w-5" />
@@ -102,7 +82,7 @@ export default function FilePage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setShowDeleteDialog(true)}
+                onClick={handleDeleteClick}
                 title="Delete"
               >
                 <Trash2 className="h-5 w-5 text-destructive" />
@@ -113,20 +93,6 @@ export default function FilePage() {
       </div>
 
       <FileViewer file={file} className="flex-1" />
-
-      <FileRenameDialog
-        open={showRenameDialog}
-        onOpenChange={setShowRenameDialog}
-        fileName={file.name}
-        onRename={handleRename}
-      />
-
-      <FileDeleteDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        fileName={file.name}
-        onDelete={handleDelete}
-      />
     </div>
   );
 }
