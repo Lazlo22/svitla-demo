@@ -1,54 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@test/test-utils';
+import { mockNavigate, mockParams } from '@test/setup';
+import { mockFolder, mockSubfolder, mockFile } from '@test/mocks/data';
 import userEvent from '@testing-library/user-event';
 import FolderPage from '@pages/FolderPage';
 import { useFolderStore } from '@stores/folderStore';
 import { useFileStore } from '@stores/fileStore';
 import { act } from '@testing-library/react';
 
-const mockNavigate = vi.fn();
-let mockParams = { '*': 'folder-1' };
-
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useParams: () => mockParams,
-  };
-});
-
-const mockFolder = {
-  id: 'folder-1',
-  name: 'Test Folder',
-  parentId: null,
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
-
-const mockSubfolder = {
-  id: 'subfolder-1',
-  name: 'Subfolder',
-  parentId: 'folder-1',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
-
-const mockFile = {
-  id: 'file-1',
-  name: 'test-document.pdf',
-  folderId: 'folder-1',
-  type: 'application/pdf' as const,
-  size: 1048576,
-  content: 'base64content',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
-
 describe('FolderPage', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-    mockParams = { '*': 'folder-1' };
+    mockParams.mockReturnValue({ '*': 'folder-1' });
     act(() => {
       useFolderStore.setState({ folders: [mockFolder] });
       useFileStore.setState({ files: [] });
@@ -97,7 +60,7 @@ describe('FolderPage', () => {
 
   it('shows files when files exist in folder', async () => {
     act(() => {
-      useFileStore.setState({ files: [mockFile] });
+      useFileStore.setState({ files: [{ ...mockFile, folderId: 'folder-1' }] });
     });
 
     render(<FolderPage />);
@@ -106,7 +69,7 @@ describe('FolderPage', () => {
   });
 
   it('shows FolderNotFound when folder does not exist', async () => {
-    mockParams = { '*': 'non-existent-folder' };
+    mockParams.mockReturnValue({ '*': 'non-existent-folder' });
 
     render(<FolderPage />);
 
@@ -143,7 +106,7 @@ describe('FolderPage', () => {
 
   it('only shows files belonging to current folder', async () => {
     const files = [
-      mockFile,
+      { ...mockFile, folderId: 'folder-1' },
       {
         ...mockFile,
         id: 'file-2',
@@ -185,18 +148,18 @@ describe('FolderPage', () => {
     const user = userEvent.setup();
 
     act(() => {
-      useFolderStore.setState({ 
+      useFolderStore.setState({
         folders: [
-          mockFolder, 
+          mockFolder,
           mockSubfolder,
           { ...mockSubfolder, id: 'subfolder-2', name: 'Another Subfolder' }
-        ] 
+        ]
       });
-      useFileStore.setState({ 
+      useFileStore.setState({
         files: [
-          mockFile,
-          { ...mockFile, id: 'file-2', name: 'another-doc.pdf' }
-        ] 
+          { ...mockFile, folderId: 'folder-1' },
+          { ...mockFile, id: 'file-2', name: 'another-doc.pdf', folderId: 'folder-1' }
+        ]
       });
     });
 
@@ -232,7 +195,7 @@ describe('FolderPage', () => {
     const user = userEvent.setup();
 
     act(() => {
-      useFileStore.setState({ files: [mockFile] });
+      useFileStore.setState({ files: [{ ...mockFile, folderId: 'folder-1' }] });
     });
 
     render(<FolderPage />);
@@ -243,10 +206,10 @@ describe('FolderPage', () => {
     // Find and click the rename button (it's in the FileItem component)
     const fileItem = screen.getByText('test-document.pdf').closest('[role="button"]');
     expect(fileItem).toBeInTheDocument();
-    
+
     // Hover to show the rename button
     await user.hover(fileItem!);
-    
+
     // Click rename button
     const renameButton = screen.getByTitle('Rename');
     await user.click(renameButton);

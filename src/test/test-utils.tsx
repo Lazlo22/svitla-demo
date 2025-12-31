@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
+import { Suspense } from 'react';
 import {
   render,
   renderHook,
@@ -19,11 +20,13 @@ function AllProviders({ children }: WrapperProps) {
   return (
     <BrowserRouter>
       <DndProvider backend={HTML5Backend}>
-        <FileDialogsProvider>
-          <FolderDialogsProvider>
-            {children}
-          </FolderDialogsProvider>
-        </FileDialogsProvider>
+        <Suspense>
+          <FileDialogsProvider>
+            <FolderDialogsProvider>
+              {children}
+            </FolderDialogsProvider>
+          </FileDialogsProvider>
+        </Suspense>
       </DndProvider>
     </BrowserRouter>
   );

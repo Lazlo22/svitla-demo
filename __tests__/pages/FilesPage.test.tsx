@@ -4,17 +4,7 @@ import userEvent from '@testing-library/user-event';
 import FilesPage from '@pages/FilesPage';
 import { useFileStore } from '@stores/fileStore';
 import { act } from '@testing-library/react';
-
-const mockFile = {
-  id: 'file-1',
-  name: 'test-document.pdf',
-  folderId: null,
-  type: 'application/pdf' as const,
-  size: 1048576,
-  content: 'base64content',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
+import { mockFile } from '@test/mocks/files';
 
 describe('FilesPage', () => {
   beforeEach(() => {
@@ -150,7 +140,8 @@ describe('FilesPage', () => {
     await user.type(searchInput, 'nonexistent');
 
     await waitFor(() => {
-      expect(screen.getByText('No results found')).toBeInTheDocument();
+      expect(screen.getByText('All Files (0)')).toBeInTheDocument();
+      expect(screen.queryByText('test-document.pdf')).not.toBeInTheDocument();
     });
   });
 });

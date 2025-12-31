@@ -170,7 +170,7 @@ describe('fileStore', () => {
       const store = useFileStore.getState();
       const file = await store.uploadFile(createMockPdfFile('original.pdf'), null);
       
-      await store.updateFileName(file.id, 'updated');
+      store.updateFileName(file.id, 'updated');
       
       const updatedFile = useFileStore.getState().getFileById(file.id);
       expect(updatedFile?.name).toBe('updated.pdf');
@@ -180,7 +180,7 @@ describe('fileStore', () => {
       const store = useFileStore.getState();
       const file = await store.uploadFile(createMockPdfFile('test.pdf'), null);
       
-      await store.updateFileName(file.id, 'newname');
+      store.updateFileName(file.id, 'newname');
       
       const updatedFile = useFileStore.getState().getFileById(file.id);
       expect(updatedFile?.name).toBe('newname.pdf');
@@ -190,7 +190,7 @@ describe('fileStore', () => {
       const store = useFileStore.getState();
       const file = await store.uploadFile(createMockPdfFile('test.pdf'), null);
       
-      await store.updateFileName(file.id, 'newname.pdf');
+      store.updateFileName(file.id, 'newname.pdf');
       
       const updatedFile = useFileStore.getState().getFileById(file.id);
       expect(updatedFile?.name).toBe('newname.pdf');
@@ -202,16 +202,16 @@ describe('fileStore', () => {
       const originalUpdatedAt = file.updatedAt;
       
       await new Promise(resolve => setTimeout(resolve, 10));
-      await store.updateFileName(file.id, 'updated');
+      store.updateFileName(file.id, 'updated');
       
       const updatedFile = useFileStore.getState().getFileById(file.id);
       expect(updatedFile?.updatedAt).toBeGreaterThan(originalUpdatedAt);
     });
 
-    it('does nothing for non-existent file', async () => {
+    it('does nothing for non-existent file', () => {
       const store = useFileStore.getState();
       
-      await store.updateFileName('non-existent-id', 'test');
+      store.updateFileName('non-existent-id', 'test');
       
       expect(useFileStore.getState().files).toHaveLength(0);
     });
@@ -222,7 +222,7 @@ describe('fileStore', () => {
       const store = useFileStore.getState();
       const file = await store.uploadFile(createMockPdfFile('test.pdf'), null);
       
-      await store.deleteFile(file.id);
+      store.deleteFile(file.id);
       
       expect(useFileStore.getState().files).toHaveLength(0);
     });
@@ -232,7 +232,7 @@ describe('fileStore', () => {
       await store.uploadFile(createMockPdfFile('file1.pdf'), null);
       const file2 = await store.uploadFile(createMockPdfFile('file2.pdf'), null);
       
-      await store.deleteFile(file2.id);
+      store.deleteFile(file2.id);
       
       const remaining = useFileStore.getState().files;
       expect(remaining).toHaveLength(1);

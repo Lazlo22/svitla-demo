@@ -1,39 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@test/test-utils';
+import { mockNavigate } from '@test/setup';
+import { mockFolder, mockFile } from '@test/mocks/data';
 import userEvent from '@testing-library/user-event';
 import FoldersPage from '@pages/FoldersPage';
 import { useFolderStore } from '@stores/folderStore';
 import { useFileStore } from '@stores/fileStore';
 import { act } from '@testing-library/react';
-
-const mockNavigate = vi.fn();
-
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
-
-const mockFolder = {
-  id: 'folder-1',
-  name: 'Test Folder',
-  parentId: null,
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
-
-const mockFile = {
-  id: 'file-1',
-  name: 'test-document.pdf',
-  folderId: null,
-  type: 'application/pdf' as const,
-  size: 1048576,
-  content: 'base64content',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
 
 describe('FoldersPage', () => {
   beforeEach(() => {
@@ -96,7 +69,7 @@ describe('FoldersPage', () => {
 
   it('shows files when root files exist', async () => {
     act(() => {
-      useFileStore.setState({ files: [mockFile] });
+      useFileStore.setState({ files: [{ ...mockFile, folderId: null }] });
     });
 
     render(<FoldersPage />);
@@ -155,7 +128,7 @@ describe('FoldersPage', () => {
 
   it('only shows root files (folderId is null)', async () => {
     const files = [
-      mockFile,
+      { ...mockFile, folderId: null },
       { ...mockFile, id: 'file-2', name: 'nested-file.pdf', folderId: 'folder-1' },
     ];
 
@@ -174,7 +147,7 @@ describe('FoldersPage', () => {
 
     act(() => {
       useFolderStore.setState({ folders: [mockFolder, { ...mockFolder, id: 'folder-2', name: 'Another Folder' }] });
-      useFileStore.setState({ files: [mockFile, { ...mockFile, id: 'file-2', name: 'another-doc.pdf' }] });
+      useFileStore.setState({ files: [{ ...mockFile, folderId: null }, { ...mockFile, id: 'file-2', name: 'another-doc.pdf', folderId: null }] });
     });
 
     render(<FoldersPage />);

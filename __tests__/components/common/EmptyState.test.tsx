@@ -13,47 +13,48 @@ describe('EmptyState', () => {
     onAction: vi.fn(),
   };
 
-  it('renders title', () => {
+  it('renders title', async () => {
     render(<EmptyState {...defaultProps} />);
-    
-    expect(screen.getByText('No files yet')).toBeInTheDocument();
+
+    expect(await screen.findByText('No files yet')).toBeInTheDocument();
   });
 
-  it('renders description', () => {
+  it('renders description', async () => {
     render(<EmptyState {...defaultProps} />);
-    
-    expect(screen.getByText('Upload your first file to get started')).toBeInTheDocument();
+
+    expect(await screen.findByText('Upload your first file to get started')).toBeInTheDocument();
   });
 
-  it('renders action button with label', () => {
+  it('renders action button with label', async () => {
     render(<EmptyState {...defaultProps} />);
-    
-    expect(screen.getByRole('button', { name: 'Upload File' })).toBeInTheDocument();
+
+    expect(await screen.findByRole('button', { name: 'Upload File' })).toBeInTheDocument();
   });
 
   it('calls onAction when button is clicked', async () => {
     const user = userEvent.setup();
     const onAction = vi.fn();
-    
+
     render(<EmptyState {...defaultProps} onAction={onAction} />);
-    
-    await user.click(screen.getByRole('button', { name: 'Upload File' }));
-    
+
+    const button = await screen.findByRole('button', { name: 'Upload File' });
+    await user.click(button);
+
     expect(onAction).toHaveBeenCalledTimes(1);
   });
 
-  it('renders action icon when provided', () => {
+  it('renders action icon when provided', async () => {
     render(<EmptyState {...defaultProps} actionIcon={Upload} />);
-    
+
     // Check that the button contains an SVG (the icon)
-    const button = screen.getByRole('button', { name: 'Upload File' });
+    const button = await screen.findByRole('button', { name: 'Upload File' });
     const svg = button.querySelector('svg');
     expect(svg).toBeInTheDocument();
   });
 
   it('renders without file drop by default', () => {
     const { container } = render(<EmptyState {...defaultProps} />);
-    
+
     // Should not have dashed border styling for drop zone
     const wrapper = container.firstChild;
     expect(wrapper).toHaveClass('border-dashed');
@@ -67,7 +68,7 @@ describe('EmptyState', () => {
         onFileDrop={vi.fn()}
       />
     );
-    
+
     const wrapper = container.firstChild;
     expect(wrapper).toHaveClass('border-dashed');
   });

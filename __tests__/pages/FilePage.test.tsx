@@ -1,20 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@test/test-utils';
+import { mockNavigate, mockParams } from '@test/setup';
+import { mockFile } from '@test/mocks/data';
 import userEvent from '@testing-library/user-event';
 import FilePage from '@pages/FilePage';
 import { useFileStore } from '@stores/fileStore';
 import { act } from '@testing-library/react';
-
-const mockFile = {
-  id: 'file-1',
-  name: 'test-document.pdf',
-  folderId: null,
-  type: 'application/pdf' as const,
-  size: 1048576,
-  content: 'data:application/pdf;base64,mockbase64content',
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
 
 // Mock FileViewer component to avoid PDF.js issues in tests
 vi.mock('@components/file/FileViewer', () => ({
@@ -23,18 +14,10 @@ vi.mock('@components/file/FileViewer', () => ({
   ),
 }));
 
-// Mock useParams to return the file ID
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
-  return {
-    ...actual,
-    useParams: () => ({ id: 'file-1' }),
-    useNavigate: () => vi.fn(),
-  };
-});
-
 describe('FilePage', () => {
   beforeEach(() => {
+    mockNavigate.mockClear();
+    mockParams.mockReturnValue({ id: 'file-1' });
     act(() => {
       useFileStore.setState({ files: [mockFile] });
     });
